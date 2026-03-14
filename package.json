@@ -1,0 +1,54 @@
+{
+  "name": "mcp-video",
+  "version": "1.0.0",
+  "description": "Cinema-grade video production MCP server — 8 tools for recording, editing, effects, captions, TTS, and smart screenshots. Zero-config, works with any MCP client.",
+  "type": "module",
+  "main": "dist/server.js",
+  "bin": { "mcp-video": "./dist/server.js" },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx src/server.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "node scripts/check-deps.js"
+  },
+  "keywords": [
+    "mcp",
+    "video",
+    "ffmpeg",
+    "recording",
+    "editing",
+    "tts",
+    "screenshot",
+    "playwright",
+    "model-context-protocol",
+    "ai",
+    "claude"
+  ],
+  "author": "StudioMeyer",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/studiomeyer-io/mcp-video.git"
+  },
+  "homepage": "https://github.com/studiomeyer-io/mcp-video",
+  "bugs": {
+    "url": "https://github.com/studiomeyer-io/mcp-video/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "playwright": "^1.50.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.6.0"
+  }
+}
