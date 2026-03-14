@@ -240,7 +240,7 @@ async function dismissPageOverlays(page: Page): Promise<void> {
   // Strategy 1: Pre-set common cookie consent localStorage/cookie values
   // This prevents banners from appearing in the first place
   await page.evaluate(() => {
-    // StudioMeyer custom cookie consent
+    // Common cookie consent localStorage key
     localStorage.setItem('cookie-consent', 'accepted');
     // Common cookie consent libraries
     localStorage.setItem('cookieConsent', 'accepted');
@@ -257,7 +257,7 @@ async function dismissPageOverlays(page: Page): Promise<void> {
     document.cookie = 'cookie-consent=accepted; path=/; max-age=31536000';
     document.cookie = 'cookieconsent_status=dismiss; path=/; max-age=31536000';
 
-    // Dispatch the consent event (StudioMeyer pattern)
+    // Dispatch custom consent event
     window.dispatchEvent(new Event('cookie-consent-accepted'));
   });
 

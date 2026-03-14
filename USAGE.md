@@ -1,6 +1,6 @@
 # mcp-video — Usage Guide
 
-**Version:** 2.1.0
+**Version:** 1.0.0
 **Tools:** 8 (consolidated from 33)
 
 ---

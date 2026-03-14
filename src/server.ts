@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
- * Video Production — MCP Server v2.1
+ * Video Production — MCP Server v1.0.0
  *
  * 8 consolidated tools (from 33+) for recording, editing, color grading,
  * audio, text, compositing, speech/narration, and smart screenshots.
  *
- * Port: 3100 (HTTP mode)
+ * Port: 9847 (HTTP mode, configurable via MCP_PORT)
  */
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
