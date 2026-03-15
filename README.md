@@ -1,8 +1,20 @@
+<div align="center">
+
 # mcp-video
 
-Cinema-grade video production MCP server. 8 tools for recording, editing, effects, captions, TTS, and smart screenshots.
+**Cinema-grade video production for AI agents.**
 
-Built on [ffmpeg](https://ffmpeg.org/) and [Playwright](https://playwright.dev/). Works with any MCP client (Claude Code, Claude Desktop, custom agents).
+[![npm version](https://img.shields.io/npm/v/mcp-video?color=blue)](https://www.npmjs.com/package/mcp-video)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue.svg)](tsconfig.json)
+[![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org)
+
+8 MCP tools for recording, editing, effects, captions, TTS, and smart screenshots.<br>
+Built on [ffmpeg](https://ffmpeg.org/) and [Playwright](https://playwright.dev/). Works with any MCP client.
+
+[Features](#features) · [Quick Start](#quick-start) · [Examples](#usage-examples) · [Architecture](#architecture)
+
+</div>
 
 ## Features
 
