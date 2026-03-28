@@ -4,9 +4,11 @@
 
 **Cinema-grade video production for AI agents.**
 
+![CI](https://github.com/studiomeyer-io/mcp-video/actions/workflows/ci.yml/badge.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
 [![npm version](https://img.shields.io/npm/v/mcp-video?color=blue)](https://www.npmjs.com/package/mcp-video)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue.svg)](tsconfig.json)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org)
 
 8 MCP tools for recording, editing, effects, captions, TTS, and smart screenshots.<br>
