@@ -103,6 +103,16 @@ MCP_HTTP=1 MCP_PORT=9847 npx mcp-video
 | `MCP_HOST` | `127.0.0.1` | HTTP bind address |
 | `MCP_VIDEO_DEBUG` | `false` | Enable debug logging |
 
+## What You Can Build
+
+| Use Case | Tools Used | Output |
+|----------|-----------|--------|
+| **Product demo video** | `video_record` → `video_text` → `video_audio` | 60fps website recording + auto-captions + background music |
+| **Social media clips** | `video_record` → `video_compose` | Record once → export to Instagram Reel, TikTok, YouTube Short |
+| **Narrated explainer** | `video_speech` → `video_color` | AI voiceover + cinematic color grade |
+| **Before/after comparison** | `video_screenshot` → `video_edit` | Smart element screenshots + PiP composition |
+| **Automated QA** | `video_record` + `video_screenshot` | Record user flows + screenshot specific elements |
+
 ## Usage Examples
 
 ### Record a website
