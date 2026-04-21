@@ -4,6 +4,7 @@
 
 import { jsonResponse, type ToolHandler } from '../lib/types.js';
 import { logger } from '../lib/logger.js';
+import { guardUrl } from '../lib/url-guard.js';
 import {
   generateSpeech,
   listElevenLabsVoices,
@@ -66,6 +67,9 @@ export const ttsHandlers: Record<string, ToolHandler> = {
 
   create_narrated_video: async (args) => {
     try {
+      const guard = guardUrl(args.url);
+      if (!guard.ok) return jsonResponse({ success: false, error: guard.reason }, true);
+
       const segments: NarrationSegment[] = (args.segments as Array<{
         text: string;
         scene: Scene;
@@ -76,11 +80,11 @@ export const ttsHandlers: Record<string, ToolHandler> = {
         paddingAfter: s.paddingAfter,
       }));
 
-      const hostname = new URL(args.url).hostname.replace(/^www\./, '').replace(/\./g, '-');
+      const hostname = new URL(guard.url).hostname.replace(/^www\./, '').replace(/\./g, '-');
       const defaultOutput = `${OUTPUT_DIR}/narrated-${hostname}-${new Date().toISOString().slice(0, 10)}`;
 
       const result = await createNarratedVideo({
-        url: args.url,
+        url: guard.url,
         segments,
         outputPath: args.outputPath ?? defaultOutput,
         provider: args.provider as TTSProvider | undefined,

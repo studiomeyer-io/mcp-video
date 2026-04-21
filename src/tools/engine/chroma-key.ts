@@ -8,10 +8,10 @@
  * - Composite onto replacement background (video, image, or solid color)
  */
 
-import { execFile } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import { logger } from '../../lib/logger.js';
+import { runFfmpeg as runFfmpegSafe } from '../../lib/ffmpeg-run.js';
 
 // ─── Types ──────────────────────────────────────────────────────────
 
@@ -36,16 +36,7 @@ export interface ChromaKeyConfig {
 // ─── Helpers ────────────────────────────────────────────────────────
 
 function runFfmpeg(args: string[], timeoutMs = 300_000): Promise<string> {
-  return new Promise((resolve, reject) => {
-    execFile('ffmpeg', args, { maxBuffer: 100 * 1024 * 1024, timeout: timeoutMs }, (error, stdout, stderr) => {
-      if (error) {
-        logger.error(`ffmpeg failed: ${stderr}`);
-        reject(new Error(`ffmpeg failed: ${stderr || error.message}`));
-        return;
-      }
-      resolve(stdout);
-    });
-  });
+  return runFfmpegSafe(args, { maxBuffer: 100 * 1024 * 1024, timeoutMs, label: 'chroma-key' });
 }
 
 function ensureDir(filePath: string): void {

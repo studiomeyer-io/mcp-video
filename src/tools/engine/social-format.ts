@@ -2,10 +2,10 @@
  * Social media format converter — crop, scale, pad for every platform
  */
 
-import { execFile } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import { logger } from '../../lib/logger.js';
+import { runFfmpeg as runFfmpegSafe } from '../../lib/ffmpeg-run.js';
 
 // ─── Format Definitions ─────────────────────────────────────────────
 
@@ -133,14 +133,5 @@ export async function convertToAllFormats(
 // ─── Helper ─────────────────────────────────────────────────────────
 
 function runFfmpeg(args: string[]): Promise<string> {
-  return new Promise((resolve, reject) => {
-    execFile('ffmpeg', args, { maxBuffer: 50 * 1024 * 1024 }, (error, stdout, stderr) => {
-      if (error) {
-        logger.error(`ffmpeg failed: ${stderr}`);
-        reject(new Error(`ffmpeg failed: ${stderr || error.message}`));
-        return;
-      }
-      resolve(stdout);
-    });
-  });
+  return runFfmpegSafe(args, { maxBuffer: 50 * 1024 * 1024, label: 'social-format' });
 }

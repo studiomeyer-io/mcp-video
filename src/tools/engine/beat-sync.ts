@@ -7,10 +7,10 @@
  * Flow: Analyze audio → find beat positions → cut clips to beats → concatenate
  */
 
-import { execFile } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import { logger } from '../../lib/logger.js';
+import { runFfmpeg as runFfmpegSafe, runFfprobe as runFfprobeSafe } from '../../lib/ffmpeg-run.js';
 
 // ─── Types ──────────────────────────────────────────────────────────
 
@@ -41,29 +41,12 @@ export interface BeatSyncResult {
 // ─── Helpers ────────────────────────────────────────────────────────
 
 function runFfmpeg(args: string[], timeoutMs = 600_000): Promise<string> {
-  return new Promise((resolve, reject) => {
-    execFile('ffmpeg', args, { maxBuffer: 100 * 1024 * 1024, timeout: timeoutMs }, (error, stdout, stderr) => {
-      if (error) {
-        logger.error(`ffmpeg failed: ${stderr}`);
-        reject(new Error(`ffmpeg failed: ${stderr || error.message}`));
-        return;
-      }
-      resolve(stderr); // ffmpeg outputs filter info to stderr
-    });
-  });
+  // ffmpeg outputs filter info to stderr for beat detection; request stderr.
+  return runFfmpegSafe(args, { maxBuffer: 100 * 1024 * 1024, timeoutMs, label: 'beat-sync' }, 'stderr');
 }
 
 function runFfmpegStdout(args: string[], timeoutMs = 300_000): Promise<string> {
-  return new Promise((resolve, reject) => {
-    execFile('ffmpeg', args, { maxBuffer: 100 * 1024 * 1024, timeout: timeoutMs }, (error, stdout, stderr) => {
-      if (error) {
-        logger.error(`ffmpeg failed: ${stderr}`);
-        reject(new Error(`ffmpeg failed: ${stderr || error.message}`));
-        return;
-      }
-      resolve(stdout);
-    });
-  });
+  return runFfmpegSafe(args, { maxBuffer: 100 * 1024 * 1024, timeoutMs, label: 'beat-sync-stdout' });
 }
 
 function ensureDir(filePath: string): void {
@@ -81,16 +64,12 @@ function fileInfo(filePath: string): string {
 }
 
 function getMediaDuration(filePath: string): Promise<number> {
-  return new Promise((resolve, reject) => {
-    execFile(
-      'ffprobe',
-      ['-v', 'quiet', '-show_entries', 'format=duration', '-of', 'csv=p=0', filePath],
-      (error, stdout) => {
-        if (error) { reject(new Error(`ffprobe failed: ${error.message}`)); return; }
-        const dur = parseFloat(stdout.trim());
-        resolve(isNaN(dur) ? 0 : dur);
-      }
-    );
+  return runFfprobeSafe(
+    ['-v', 'quiet', '-show_entries', 'format=duration', '-of', 'csv=p=0', filePath],
+    { maxBuffer: 10 * 1024 * 1024, label: 'beat-sync-probe' },
+  ).then((s) => {
+    const dur = parseFloat(s.trim());
+    return isNaN(dur) ? 0 : dur;
   });
 }
 

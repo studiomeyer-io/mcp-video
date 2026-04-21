@@ -12,6 +12,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import { logger } from '../../lib/logger.js';
+import { guardFinalUrl } from '../../lib/url-guard.js';
 import type { RecordingConfig, RecordingResult, ViewportConfig, Scene } from './types.js';
 import { VIEWPORTS } from './types.js';
 import { injectCursor, hideCursor } from './cursor.js';
@@ -92,6 +93,13 @@ export async function recordWebsite(config: RecordingConfig): Promise<RecordingR
       // Fallback: try with just domcontentloaded
       await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
     });
+
+    // Post-redirect guard: browser may have followed 302/301 to an internal host.
+    const finalUrl = page.url();
+    const finalGuard = guardFinalUrl(finalUrl);
+    if (!finalGuard.ok) {
+      throw new Error(`post-redirect check failed — final URL rejected: ${finalGuard.reason}`);
+    }
 
     // Wait for content to render
     await page.waitForTimeout(2000);

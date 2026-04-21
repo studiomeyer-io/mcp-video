@@ -3,24 +3,18 @@
  * All processing via ffmpeg + ffprobe (no npm dependencies)
  */
 
-import { execFile } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import { logger } from '../../lib/logger.js';
+import { runFfmpeg as runFfmpegSafe, runFfprobe as runFfprobeSafe } from '../../lib/ffmpeg-run.js';
 
 // ─── ffprobe helper ─────────────────────────────────────────────────
 
 export function getMediaDuration(filePath: string): Promise<number> {
-  return new Promise((resolve, reject) => {
-    execFile(
-      'ffprobe',
-      ['-v', 'quiet', '-show_entries', 'format=duration', '-of', 'csv=p=0', filePath],
-      (error, stdout) => {
-        if (error) reject(new Error(`ffprobe failed: ${error.message}`));
-        else resolve(parseFloat(stdout.trim()) || 0);
-      }
-    );
-  });
+  return runFfprobeSafe(
+    ['-v', 'quiet', '-show_entries', 'format=duration', '-of', 'csv=p=0', filePath],
+    { maxBuffer: 10 * 1024 * 1024, label: 'audio-probe' },
+  ).then((s) => parseFloat(s.trim()) || 0);
 }
 
 // ─── Background Music ───────────────────────────────────────────────
@@ -102,14 +96,5 @@ export async function addBackgroundMusic(config: AddMusicConfig): Promise<string
 // ─── ffmpeg runner ──────────────────────────────────────────────────
 
 function runFfmpeg(args: string[]): Promise<string> {
-  return new Promise((resolve, reject) => {
-    execFile('ffmpeg', args, { maxBuffer: 50 * 1024 * 1024 }, (error, stdout, stderr) => {
-      if (error) {
-        logger.error(`ffmpeg failed: ${stderr}`);
-        reject(new Error(`ffmpeg failed: ${stderr || error.message}`));
-        return;
-      }
-      resolve(stdout);
-    });
-  });
+  return runFfmpegSafe(args, { maxBuffer: 50 * 1024 * 1024, label: 'audio' });
 }

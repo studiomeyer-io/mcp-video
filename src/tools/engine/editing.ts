@@ -5,25 +5,16 @@
  * All processing via ffmpeg (no npm dependencies).
  */
 
-import { execFile } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import { logger } from '../../lib/logger.js';
+import { runFfmpeg as runFfmpegSafe, runFfprobe as runFfprobeSafe } from '../../lib/ffmpeg-run.js';
 import { getMediaDuration } from './audio.js';
 
 // ─── Shared ffmpeg runner ────────────────────────────────────────────
 
 function runFfmpeg(args: string[], timeoutMs = 300_000): Promise<string> {
-  return new Promise((resolve, reject) => {
-    execFile('ffmpeg', args, { maxBuffer: 100 * 1024 * 1024, timeout: timeoutMs }, (error, stdout, stderr) => {
-      if (error) {
-        logger.error(`ffmpeg failed: ${stderr}`);
-        reject(new Error(`ffmpeg failed: ${stderr || error.message}`));
-        return;
-      }
-      resolve(stdout);
-    });
-  });
+  return runFfmpegSafe(args, { maxBuffer: 100 * 1024 * 1024, timeoutMs, label: 'editing' });
 }
 
 function ensureDir(filePath: string): void {
@@ -37,16 +28,10 @@ function assertExists(filePath: string, label = 'File'): void {
 
 /** Check if a media file has an audio stream */
 function hasAudioStream(filePath: string): Promise<boolean> {
-  return new Promise((resolve) => {
-    execFile(
-      'ffprobe',
-      ['-v', 'quiet', '-select_streams', 'a', '-show_entries', 'stream=codec_type', '-of', 'csv=p=0', filePath],
-      (error, stdout) => {
-        if (error) { resolve(false); return; }
-        resolve(stdout.trim().length > 0);
-      }
-    );
-  });
+  return runFfprobeSafe(
+    ['-v', 'quiet', '-select_streams', 'a', '-show_entries', 'stream=codec_type', '-of', 'csv=p=0', filePath],
+    { maxBuffer: 10 * 1024 * 1024, label: 'editing-probe-audio' },
+  ).then((s) => s.trim().length > 0).catch(() => false);
 }
 
 function fileInfo(filePath: string): string {
@@ -660,19 +645,17 @@ function buildInterpolationExpr(keyframes: Keyframe[], prop: 'scale' | 'panX' | 
 }
 
 async function getVideoResolution(filePath: string): Promise<{ width: number; height: number }> {
-  return new Promise((resolve, reject) => {
-    execFile(
-      'ffprobe',
-      ['-v', 'quiet', '-select_streams', 'v:0', '-show_entries', 'stream=width,height', '-of', 'json', filePath],
-      (error, stdout) => {
-        if (error) { reject(new Error(`ffprobe failed: ${error.message}`)); return; }
-        try {
-          const data = JSON.parse(stdout);
-          const stream = data.streams?.[0];
-          resolve({ width: stream?.width ?? 1920, height: stream?.height ?? 1080 });
-        } catch { resolve({ width: 1920, height: 1080 }); }
-      }
-    );
+  return runFfprobeSafe(
+    ['-v', 'quiet', '-select_streams', 'v:0', '-show_entries', 'stream=width,height', '-of', 'json', filePath],
+    { maxBuffer: 10 * 1024 * 1024, label: 'editing-probe-resolution' },
+  ).then((stdout) => {
+    try {
+      const data = JSON.parse(stdout);
+      const stream = data.streams?.[0];
+      return { width: stream?.width ?? 1920, height: stream?.height ?? 1080 };
+    } catch {
+      return { width: 1920, height: 1080 };
+    }
   });
 }
 

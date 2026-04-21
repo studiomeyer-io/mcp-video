@@ -16,6 +16,7 @@ import type { Page, Browser, BrowserContext, ElementHandle } from 'playwright';
 import * as fs from 'fs';
 import * as path from 'path';
 import { logger } from '../../lib/logger.js';
+import { guardFinalUrl } from '../../lib/url-guard.js';
 
 const OUTPUT_DIR = process.env.VIDEO_OUTPUT_DIR || './output';
 
@@ -424,6 +425,13 @@ export async function smartScreenshot(config: SmartScreenshotConfig): Promise<Sm
     await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 }).catch(async () => {
       await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
     });
+
+    // Post-redirect guard: follow-the-redirect must not land on a private IP.
+    const finalUrl = page.url();
+    const finalGuard = guardFinalUrl(finalUrl);
+    if (!finalGuard.ok) {
+      throw new Error(`post-redirect check failed — final URL rejected: ${finalGuard.reason}`);
+    }
 
     await page.waitForTimeout(waitAfterLoad);
 

@@ -8,10 +8,10 @@
  * concat, audio, social-format.
  */
 
-import { execFile } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import { logger } from '../../lib/logger.js';
+import { runFfmpeg as runFfmpegSafe } from '../../lib/ffmpeg-run.js';
 import { getTemplate } from './templates.js';
 import type { VideoTemplate, TemplateSlot } from './templates.js';
 
@@ -55,16 +55,7 @@ export interface RenderResult {
 // ─── Helpers ────────────────────────────────────────────────────────
 
 function runFfmpeg(args: string[], timeoutMs = 600_000): Promise<string> {
-  return new Promise((resolve, reject) => {
-    execFile('ffmpeg', args, { maxBuffer: 100 * 1024 * 1024, timeout: timeoutMs }, (error, stdout, stderr) => {
-      if (error) {
-        logger.error(`ffmpeg failed: ${stderr}`);
-        reject(new Error(`ffmpeg failed: ${stderr || error.message}`));
-        return;
-      }
-      resolve(stdout);
-    });
-  });
+  return runFfmpegSafe(args, { maxBuffer: 100 * 1024 * 1024, timeoutMs, label: 'template-renderer' });
 }
 
 function ensureDir(filePath: string): void {

@@ -9,10 +9,12 @@
  * 3. Merge video + audio into final output
  */
 
-import { execFile } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import { logger } from '../../lib/logger.js';
+import { withTempDir } from '../../lib/temp-dir.js';
+import { validateFfmpegPath, type FfmpegProtocolSet } from '../../lib/ffmpeg-safety.js';
+import { runFfmpeg as runFfmpegSafe } from '../../lib/ffmpeg-run.js';
 import { generateSpeech } from './tts.js';
 import type { TTSProvider, ElevenLabsVoice, ElevenLabsModel, OpenAIVoice, OpenAIModel } from './tts.js';
 import { recordWebsite } from './capture.js';
@@ -91,10 +93,7 @@ export async function createNarratedVideo(
     viewport = 'desktop',
   } = config;
 
-  const tempDir = `/tmp/narrated-video-${Date.now()}`;
-  fs.mkdirSync(tempDir, { recursive: true });
-
-  try {
+  return withTempDir('narrated-video', async (tempDir) => {
     // ─── Step 1: Generate all speech segments ───────────────────
     logger.info(`Generating ${segments.length} speech segment(s)...`);
     const audioPaths: string[] = [];
@@ -197,13 +196,10 @@ export async function createNarratedVideo(
       finalPath,
     );
 
-    await runFfmpeg(mergeArgs);
+    await runFfmpeg(mergeArgs, config.backgroundMusicPath ? 'https-input' : 'local-only');
 
     const finalStats = fs.statSync(finalPath);
     const finalDuration = await getMediaDuration(finalPath);
-
-    // ─── Cleanup ────────────────────────────────────────────────
-    fs.rmSync(tempDir, { recursive: true, force: true });
 
     logger.info(`Narrated video ready: ${finalPath} (${finalDuration.toFixed(1)}s, ${(finalStats.size / 1024 / 1024).toFixed(2)} MB)`);
 
@@ -221,11 +217,7 @@ export async function createNarratedVideo(
       },
       url,
     };
-  } catch (error) {
-    // Cleanup on error
-    try { fs.rmSync(tempDir, { recursive: true, force: true }); } catch { /* ignore */ }
-    throw error;
-  }
+  });
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────
@@ -234,34 +226,30 @@ export async function createNarratedVideo(
  * Concatenate multiple audio files using ffmpeg concat demuxer
  */
 async function concatenateAudio(files: string[], outputPath: string): Promise<void> {
+  for (const f of files) validateFfmpegPath(f, 'concat-input');
+  validateFfmpegPath(outputPath, 'concat-output');
+
   // Create concat list file
   const listPath = outputPath + '.txt';
-  const listContent = files.map((f) => `file '${f}'`).join('\n');
+  const listContent = files.map((f) => `file '${f.replace(/'/g, "'\\''")}'`).join('\n');
   fs.writeFileSync(listPath, listContent);
 
-  await runFfmpeg([
-    '-y',
-    '-f', 'concat',
-    '-safe', '0',
-    '-i', listPath,
-    '-c:a', 'libmp3lame',
-    '-b:a', '192k',
-    outputPath,
-  ]);
-
-  // Cleanup list file
-  fs.unlinkSync(listPath);
+  try {
+    await runFfmpeg([
+      '-y',
+      '-f', 'concat',
+      '-safe', '0',
+      '-i', listPath,
+      '-c:a', 'libmp3lame',
+      '-b:a', '192k',
+      outputPath,
+    ]);
+  } finally {
+    // Cleanup list file
+    try { fs.unlinkSync(listPath); } catch { /* already gone */ }
+  }
 }
 
-function runFfmpeg(args: string[]): Promise<string> {
-  return new Promise((resolve, reject) => {
-    execFile('ffmpeg', args, { maxBuffer: 50 * 1024 * 1024 }, (error, stdout, stderr) => {
-      if (error) {
-        logger.error(`ffmpeg failed: ${stderr}`);
-        reject(new Error(`ffmpeg failed: ${stderr || error.message}`));
-        return;
-      }
-      resolve(stdout);
-    });
-  });
+function runFfmpeg(args: string[], protocols: FfmpegProtocolSet = 'local-only'): Promise<string> {
+  return runFfmpegSafe(args, { maxBuffer: 50 * 1024 * 1024, protocols, label: 'narrated-video' });
 }

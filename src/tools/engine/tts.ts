@@ -10,6 +10,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { logger } from '../../lib/logger.js';
+import { sanitizeErrorMessage } from '../../lib/error-sanitizer.js';
 import { getMediaDuration } from './audio.js';
 
 // ─── Types ──────────────────────────────────────────────────────────
@@ -121,7 +122,7 @@ export async function generateSpeech(config: TTSConfig): Promise<TTSResult> {
   } catch (error) {
     // Fallback: try the other provider
     const fallback = provider === 'elevenlabs' ? 'openai' : 'elevenlabs';
-    const msg = error instanceof Error ? error.message : String(error);
+    const msg = sanitizeErrorMessage(error);
     logger.warn(`${provider} TTS failed (${msg}), falling back to ${fallback}`);
 
     try {
@@ -131,7 +132,7 @@ export async function generateSpeech(config: TTSConfig): Promise<TTSResult> {
         audioPath = await openaiTTS(config, finalPath);
       }
     } catch (fallbackError) {
-      const fbMsg = fallbackError instanceof Error ? fallbackError.message : String(fallbackError);
+      const fbMsg = sanitizeErrorMessage(fallbackError);
       throw new Error(`Both TTS providers failed. ${provider}: ${msg}, ${fallback}: ${fbMsg}`);
     }
   }
@@ -197,8 +198,12 @@ async function elevenLabsTTS(config: TTSConfig, outputPath: string): Promise<str
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`ElevenLabs API ${response.status}: ${errorText}`);
+    const errorText = await response.text().catch(() => '');
+    throw new Error(
+      sanitizeErrorMessage(errorText, {
+        prefix: `ElevenLabs API ${response.status}: `,
+      })
+    );
   }
 
   const arrayBuffer = await response.arrayBuffer();
@@ -236,8 +241,12 @@ async function openaiTTS(config: TTSConfig, outputPath: string): Promise<string>
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`OpenAI TTS API ${response.status}: ${errorText}`);
+    const errorText = await response.text().catch(() => '');
+    throw new Error(
+      sanitizeErrorMessage(errorText, {
+        prefix: `OpenAI TTS API ${response.status}: `,
+      })
+    );
   }
 
   const arrayBuffer = await response.arrayBuffer();
