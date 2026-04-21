@@ -7,6 +7,7 @@ import { logger } from '../lib/logger.js';
 import { recordWebsite } from '../tools/index.js';
 import type { RecordingConfig, Scene, ViewportPreset } from '../tools/index.js';
 import * as path from 'path';
+import { guardUrl } from '../lib/url-guard.js';
 
 const OUTPUT_DIR = process.env.VIDEO_OUTPUT_DIR || './output';
 
@@ -16,9 +17,11 @@ export const videoHandlers: Record<string, ToolHandler> = {
    */
   record_website_video: async (args) => {
     try {
+      const guard = guardUrl(args.url);
+      if (!guard.ok) return jsonResponse({ success: false, error: guard.reason }, true);
       const config: RecordingConfig = {
-        url: args.url,
-        outputPath: args.outputPath ?? generateOutputPath(args.url, 'video'),
+        url: guard.url,
+        outputPath: args.outputPath ?? generateOutputPath(guard.url, 'video'),
         viewport: args.viewport as ViewportPreset ?? 'desktop',
         fps: args.fps ?? 60,
         scenes: args.scenes as Scene[] | undefined,
@@ -46,12 +49,14 @@ export const videoHandlers: Record<string, ToolHandler> = {
    */
   record_website_scroll: async (args) => {
     try {
+      const guard = guardUrl(args.url);
+      if (!guard.ok) return jsonResponse({ success: false, error: guard.reason }, true);
       const duration = args.duration ?? 12;
       const easing = args.easing ?? 'showcase';
 
       const config: RecordingConfig = {
-        url: args.url,
-        outputPath: args.outputPath ?? generateOutputPath(args.url, 'scroll'),
+        url: guard.url,
+        outputPath: args.outputPath ?? generateOutputPath(guard.url, 'scroll'),
         viewport: (args.viewport as ViewportPreset) ?? 'desktop',
         fps: 60,
         scenes: [
@@ -77,17 +82,19 @@ export const videoHandlers: Record<string, ToolHandler> = {
    */
   record_multi_device: async (args) => {
     try {
+      const guard = guardUrl(args.url);
+      if (!guard.ok) return jsonResponse({ success: false, error: guard.reason }, true);
       const devices: ViewportPreset[] = args.devices ?? ['desktop', 'tablet', 'mobile'];
       const duration = args.duration ?? 10;
       const outputDir = args.outputDir ?? OUTPUT_DIR;
       const results: Record<string, unknown> = {};
 
       for (const device of devices) {
-        logger.info(`Recording ${device} viewport for ${args.url}...`);
+        logger.info(`Recording ${device} viewport for ${guard.url}...`);
 
         const config: RecordingConfig = {
-          url: args.url,
-          outputPath: path.join(outputDir, generateOutputName(args.url, device)),
+          url: guard.url,
+          outputPath: path.join(outputDir, generateOutputName(guard.url, device)),
           viewport: device,
           fps: 60,
           scenes: [

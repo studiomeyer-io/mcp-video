@@ -6,6 +6,7 @@ import { jsonResponse, type ToolHandler } from '../lib/types.js';
 import { logger } from '../lib/logger.js';
 import { smartScreenshot } from '../tools/engine/smart-screenshot.js';
 import type { SmartScreenshotConfig, SmartTarget } from '../tools/engine/smart-screenshot.js';
+import { guardUrl } from '../lib/url-guard.js';
 
 export const smartScreenshotHandlers: Record<string, ToolHandler> = {
   /**
@@ -13,8 +14,10 @@ export const smartScreenshotHandlers: Record<string, ToolHandler> = {
    */
   screenshot_element: async (args) => {
     try {
+      const guard = guardUrl(args.url);
+      if (!guard.ok) return jsonResponse({ success: false, error: guard.reason }, true);
       const config: SmartScreenshotConfig = {
-        url: args.url,
+        url: guard.url,
         targets: normalizeTargetArgs(args.targets),
         outputDir: args.outputDir,
         viewport: args.viewport ?? { width: 1920, height: 1080 },
@@ -37,8 +40,10 @@ export const smartScreenshotHandlers: Record<string, ToolHandler> = {
    */
   detect_page_features: async (args) => {
     try {
+      const guard = guardUrl(args.url);
+      if (!guard.ok) return jsonResponse({ success: false, error: guard.reason }, true);
       const config: SmartScreenshotConfig = {
-        url: args.url,
+        url: guard.url,
         targets: ['all'],
         viewport: args.viewport ?? { width: 1920, height: 1080 },
         includeFullPage: false,
@@ -49,7 +54,7 @@ export const smartScreenshotHandlers: Record<string, ToolHandler> = {
       const result = await smartScreenshot(config);
       return jsonResponse({
         success: true,
-        url: args.url,
+        url: guard.url,
         features: result.detected.map(f => ({
           name: f.name,
           selector: f.selector,
