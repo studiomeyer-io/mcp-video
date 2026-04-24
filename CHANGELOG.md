@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Security — Round-4 OSS-Sweep (2026-04-24)
+
+- **`server.ts` dependency check**: replaced `execSync(\`which ${bin}\`)`
+  shell-interpolation with `execFileSync('which', [bin], ...)`. The input
+  was already a hardcoded literal array, so no real exposure today — this
+  is defense-in-depth so a future refactor that makes the list
+  config-driven can't turn into a command-injection sink. 89/89 tests
+  still green, tsc clean.
+
 ### Security — hardening sweep (Session 840, 2026-04-21)
 
 Four of the five Session 837 Must-Fix items plus the three Session 839

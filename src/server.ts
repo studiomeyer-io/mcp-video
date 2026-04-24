@@ -254,13 +254,15 @@ You have 8 tools for video production. Each has a \`type\` parameter to select t
 
 // ─── Startup Validation ──────────────────────────────────
 
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import * as fs from 'fs';
 
 function checkDependencies(): void {
+  // execFileSync avoids shell interpolation even though `bin` is a hardcoded
+  // literal today — keeps the defense-in-depth clear to future refactors.
   for (const bin of ['ffmpeg', 'ffprobe']) {
     try {
-      execSync(`which ${bin}`, { stdio: 'pipe' });
+      execFileSync('which', [bin], { stdio: 'pipe' });
     } catch {
       logger.error(`${bin} not found. Install ffmpeg: https://ffmpeg.org/download.html`);
       process.exit(1);
