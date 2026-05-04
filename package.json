@@ -43,7 +43,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",
     "playwright": "^1.50.0",
-    "zod": "^3.22.0"
+    "zod": "^4.4.2"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
