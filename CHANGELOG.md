@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed — Cross-platform ffmpeg detection (issue #11, 2026-05-07)
+
+- **Windows startup failure**: `checkDependencies()` previously called
+  `execFileSync('which', [bin])` to verify ffmpeg/ffprobe presence. `which`
+  is a Unix-only command, so the check failed on Windows even when ffmpeg
+  was on PATH and runnable. Reported by [@Firelods](https://github.com/Firelods)
+  in [#11](https://github.com/studiomeyer-io/mcp-video/issues/11).
+- **`FFMPEG_PATH` / `FFPROBE_PATH` env overrides now actually work at
+  runtime**, not only in error-message text. The previous implementation
+  spawned `execFile('ffmpeg', ...)` directly inside `ffmpeg-run.ts`, so
+  setting the env var was ignored at every spawn site. The original
+  reporter confirmed this on the issue thread.
+
+**New module:** `src/lib/ffmpeg-bin.ts` exposes `resolveFfmpegBin()` (env
+override → bare-name fallback) and `assertFfmpegBinAvailable()` (probe via
+`<bin> -version`, no shell, `windowsHide: true`). Both `server.ts`
+startup-check and `ffmpeg-run.ts` runtime spawn now go through the same
+helper, so the override stays consistent.
+
+15 new regression tests + the original test suite (104/104 green); typecheck
+clean. Thanks to [@Firelods](https://github.com/Firelods) for the detailed
+environment + reproduction.
+
 ### Security — Round-4 OSS-Sweep (2026-04-24)
 
 - **`server.ts` dependency check**: replaced `execSync(\`which ${bin}\`)`

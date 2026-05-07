@@ -254,17 +254,20 @@ You have 8 tools for video production. Each has a \`type\` parameter to select t
 
 // ─── Startup Validation ──────────────────────────────────
 
-import { execFileSync } from 'child_process';
 import * as fs from 'fs';
+import { assertFfmpegBinAvailable } from './lib/ffmpeg-bin.js';
 
 function checkDependencies(): void {
-  // execFileSync avoids shell interpolation even though `bin` is a hardcoded
-  // literal today — keeps the defense-in-depth clear to future refactors.
-  for (const bin of ['ffmpeg', 'ffprobe']) {
+  // Cross-platform binary check (issue #11): the previous version called
+  // `which ffmpeg`, which is Unix-only and silently failed on Windows even
+  // when ffmpeg was on PATH. assertFfmpegBinAvailable invokes `<bin> -version`
+  // directly via execFile (no shell), honours FFMPEG_PATH / FFPROBE_PATH env
+  // overrides, and works on Linux, macOS, and Windows.
+  for (const bin of ['ffmpeg', 'ffprobe'] as const) {
     try {
-      execFileSync('which', [bin], { stdio: 'pipe' });
-    } catch {
-      logger.error(`${bin} not found. Install ffmpeg: https://ffmpeg.org/download.html`);
+      assertFfmpegBinAvailable(bin);
+    } catch (err) {
+      logger.error(err instanceof Error ? err.message : String(err));
       process.exit(1);
     }
   }
