@@ -58,10 +58,14 @@ From a small studio in Palma de Mallorca.
 ## Prerequisites
 
 - **Node.js** >= 18
-- **ffmpeg** and **ffprobe** (validated on startup)
+- **ffmpeg** and **ffprobe** (validated on startup, cross-platform)
 - **Playwright** browsers (`npx playwright install chromium`)
 - Optional: `ELEVENLABS_API_KEY` for ElevenLabs TTS
 - Optional: `OPENAI_API_KEY` for Whisper captions and OpenAI TTS
+
+If ffmpeg lives outside `PATH`, set `FFMPEG_PATH` and `FFPROBE_PATH` to the
+absolute binary paths. Both env vars are honoured at startup AND at every
+runtime spawn site.
 
 ## Quick Start
 
@@ -110,6 +114,8 @@ MCP_HTTP=1 MCP_PORT=9847 npx mcp-video
 | Environment Variable | Default | Description |
 |---------------------|---------|-------------|
 | `VIDEO_OUTPUT_DIR` | `./output` | Directory for generated files |
+| `FFMPEG_PATH` | — | Absolute path to `ffmpeg` binary if not on `PATH` |
+| `FFPROBE_PATH` | — | Absolute path to `ffprobe` binary if not on `PATH` |
 | `ELEVENLABS_API_KEY` | — | ElevenLabs TTS API key |
 | `OPENAI_API_KEY` | — | OpenAI API key (Whisper + TTS) |
 | `MCP_HTTP` | `false` | Enable HTTP transport |

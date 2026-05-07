@@ -19,6 +19,7 @@ import { execFile } from 'node:child_process';
 import { logger } from './logger.js';
 import { buildFfmpegArgs, type FfmpegProtocolSet } from './ffmpeg-safety.js';
 import { sanitizeErrorMessage } from './error-sanitizer.js';
+import { resolveFfmpegBin } from './ffmpeg-bin.js';
 
 export interface FfmpegRunOptions {
   /** Bytes of stdout+stderr buffered before killing the process. Default: 50 MB. */
@@ -51,9 +52,9 @@ export function runFfmpeg(
 
   return new Promise((resolve, reject) => {
     execFile(
-      'ffmpeg',
+      resolveFfmpegBin('ffmpeg'),
       safeArgs,
-      { maxBuffer, timeout: timeoutMs },
+      { maxBuffer, timeout: timeoutMs, windowsHide: true },
       (error, stdout, stderr) => {
         if (error) {
           const safeMsg = sanitizeErrorMessage(stderr || error.message);
@@ -92,9 +93,9 @@ export function runFfprobe(
 
   return new Promise((resolve, reject) => {
     execFile(
-      'ffprobe',
+      resolveFfmpegBin('ffprobe'),
       safeArgs,
-      { maxBuffer, timeout: timeoutMs },
+      { maxBuffer, timeout: timeoutMs, windowsHide: true },
       (error, stdout, stderr) => {
         if (error) {
           const safeMsg = sanitizeErrorMessage(stderr || error.message);
