@@ -6,7 +6,14 @@
 
 # mcp-video
 
-**Cinema-grade video production for AI agents.**
+
+<!-- badges -->
+[![npm version](https://img.shields.io/npm/v/mcp-video?style=flat-square&color=cb3837&logo=npm&label=npm)](https://www.npmjs.com/package/mcp-video)
+[![npm downloads](https://img.shields.io/npm/dm/mcp-video?style=flat-square&color=cb3837&logo=npm&label=installs%2Fmo)](https://www.npmjs.com/package/mcp-video)
+![License](https://img.shields.io/github/license/studiomeyer-io/mcp-video?style=flat-square&color=22c55e&label=license)
+![Last commit](https://img.shields.io/github/last-commit/studiomeyer-io/mcp-video?style=flat-square&color=88c0d0&label=updated)
+![GitHub stars](https://img.shields.io/github/stars/studiomeyer-io/mcp-video?style=flat-square&color=ffd700&logo=github&label=stars)
+<!-- /badges -->**Cinema-grade video production for AI agents.**
 
 ![CI](https://github.com/studiomeyer-io/mcp-video/actions/workflows/ci.yml/badge.svg)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
