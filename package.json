@@ -1,10 +1,12 @@
 {
-  "name": "mcp-video",
-  "version": "1.0.0",
-  "description": "Cinema-grade video production MCP server — 8 tools for recording, editing, effects, captions, TTS, and smart screenshots. Zero-config, works with any MCP client.",
+  "name": "@studiomeyer/mcp-video",
+  "version": "1.0.1",
+  "description": "Cinema-grade video production MCP server \u2014 8 tools for recording, editing, effects, captions, TTS, and smart screenshots. Zero-config, works with any MCP client.",
   "type": "module",
   "main": "dist/server.js",
-  "bin": { "mcp-video": "./dist/server.js" },
+  "bin": {
+    "mcp-video": "./dist/server.js"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
