@@ -1,6 +1,7 @@
 {
   "name": "@studiomeyer/mcp-video",
-  "version": "1.0.1",
+  "version": "1.0.2",
+  "mcpName": "io.studiomeyer/video",
   "description": "Cinema-grade video production MCP server \u2014 8 tools for recording, editing, effects, captions, TTS, and smart screenshots. Zero-config, works with any MCP client.",
   "type": "module",
   "main": "dist/server.js",
