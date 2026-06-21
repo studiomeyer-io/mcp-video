@@ -129,6 +129,7 @@ MCP_HTTP=1 MCP_PORT=9847 npx mcp-video
 | `MCP_PORT` | `9847` | HTTP port |
 | `MCP_HOST` | `127.0.0.1` | HTTP bind address |
 | `MCP_VIDEO_DEBUG` | `false` | Enable debug logging |
+| `MCP_VIDEO_ALLOW_INTERNAL` | `false` | Set to `1` to allow URLs that resolve to localhost / private / metadata IPs. **Local dev only** — leave unset in production (SSRF guard). |
 
 ## What You Can Build
 

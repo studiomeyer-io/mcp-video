@@ -6,7 +6,7 @@ import { jsonResponse, type ToolHandler } from '../lib/types.js';
 import { logger } from '../lib/logger.js';
 import { smartScreenshot } from '../tools/engine/smart-screenshot.js';
 import type { SmartScreenshotConfig, SmartTarget } from '../tools/engine/smart-screenshot.js';
-import { guardUrl } from '../lib/url-guard.js';
+import { resolveAndGuardUrl } from '../lib/url-guard.js';
 
 export const smartScreenshotHandlers: Record<string, ToolHandler> = {
   /**
@@ -14,7 +14,7 @@ export const smartScreenshotHandlers: Record<string, ToolHandler> = {
    */
   screenshot_element: async (args) => {
     try {
-      const guard = guardUrl(args.url);
+      const guard = await resolveAndGuardUrl(args.url);
       if (!guard.ok) return jsonResponse({ success: false, error: guard.reason }, true);
       const config: SmartScreenshotConfig = {
         url: guard.url,
@@ -40,7 +40,7 @@ export const smartScreenshotHandlers: Record<string, ToolHandler> = {
    */
   detect_page_features: async (args) => {
     try {
-      const guard = guardUrl(args.url);
+      const guard = await resolveAndGuardUrl(args.url);
       if (!guard.ok) return jsonResponse({ success: false, error: guard.reason }, true);
       const config: SmartScreenshotConfig = {
         url: guard.url,

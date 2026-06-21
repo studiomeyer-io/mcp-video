@@ -6,7 +6,7 @@ const execFileMock = vi.hoisted(() => vi.fn());
 vi.mock('node:child_process', () => ({ execFile: execFileMock }));
 
 // IMPORTANT: import AFTER vi.mock so the mock is bound.
-import { runFfmpeg } from './ffmpeg-run.js';
+import { runFfmpeg, runFfprobe } from './ffmpeg-run.js';
 
 describe('ffmpeg-run — runFfmpeg', () => {
   beforeEach(() => {
@@ -72,5 +72,54 @@ describe('ffmpeg-run — runFfmpeg', () => {
       cb(new Error('x'), '', 'boom');
     });
     await expect(runFfmpeg([], { label: 'lut-preset' })).rejects.toThrow(/lut-preset/);
+  });
+});
+
+describe('ffmpeg-run — runFfprobe', () => {
+  beforeEach(() => {
+    execFileMock.mockReset();
+  });
+
+  it('prepends -protocol_whitelist on every probe (closes the "just probe first" SSRF bypass)', async () => {
+    execFileMock.mockImplementationOnce((_bin, _args, _opts, cb) => {
+      cb(null, '12.34', '');
+    });
+    await runFfprobe(['-show_entries', 'format=duration', 'in.mp4']);
+    const args = execFileMock.mock.calls[0][1] as string[];
+    expect(args[0]).toBe('-protocol_whitelist');
+    expect(args[1]).toBe('file,pipe,crypto,cache,fd');
+    expect(args.slice(2)).toEqual(['-show_entries', 'format=duration', 'in.mp4']);
+  });
+
+  it('never includes http in the default probe whitelist', async () => {
+    execFileMock.mockImplementationOnce((_bin, _args, _opts, cb) => {
+      cb(null, '', '');
+    });
+    await runFfprobe(['x']);
+    const protocols = (execFileMock.mock.calls[0][1] as string[])[1].split(',');
+    expect(protocols).not.toContain('http');
+    expect(protocols).not.toContain('rtsp');
+  });
+
+  it('resolves with stdout by default (probe output is on stdout)', async () => {
+    execFileMock.mockImplementationOnce((_bin, _args, _opts, cb) => {
+      cb(null, '1920\n1080', 'noise');
+    });
+    const out = await runFfprobe(['x']);
+    expect(out).toBe('1920\n1080');
+  });
+
+  it('rejects with a sanitized message when ffprobe fails', async () => {
+    execFileMock.mockImplementationOnce((_bin, _args, _opts, cb) => {
+      cb(new Error('exit 1'), '', 'x-api-key: super-secret-value');
+    });
+    await expect(runFfprobe(['x'])).rejects.toThrow(/\[REDACTED\]/);
+  });
+
+  it('includes the label in the rejection message', async () => {
+    execFileMock.mockImplementationOnce((_bin, _args, _opts, cb) => {
+      cb(new Error('x'), '', 'boom');
+    });
+    await expect(runFfprobe([], { label: 'audio-probe' })).rejects.toThrow(/audio-probe/);
   });
 });

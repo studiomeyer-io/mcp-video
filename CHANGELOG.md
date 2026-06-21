@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Security — wire path/SSRF guards into the tool boundary (2026-06-21)
+
+The prior sweeps *built* `validateFfmpegPath` and `resolveAndGuardUrl` but
+left them mostly unconnected: only `narrated-video.ts` validated paths, and
+**no** handler used the DNS-resolving URL guard. This release connects the
+existing defenses to the actual tool entry points.
+
+- **Flag-injection choke point (`src/lib/sanitize-tool-paths.ts`, NEW).**
+  Every path-like argument (`inputPath`, `outputPath`, `videoPath`,
+  `musicPath`, `subtitlePath`, `mainVideo`/`overlayVideo`, concat
+  `clips[].path`, mixer `tracks[].path`, beat-sync `clips[]`,
+  template `clips{}`, chroma-key `background`) is now validated in
+  `handleToolCall` before any handler can forward it to ffmpeg/ffprobe.
+  A path beginning with `-` (e.g. `outputPath: "-y"`) or containing a NUL
+  byte is rejected with a structured tool error instead of being passed to
+  ffmpeg as a flag. Output paths previously had **no** existence check, so
+  this was a live gap; engine `assertExists` only ever guarded inputs.
+  Chroma-key `background` keeps accepting a bare 6-digit hex colour.
+- **DNS-rebinding SSRF upgrade.** `record_website_video`,
+  `record_website_scroll`, `record_multi_device`, `create_narrated_video`,
+  `screenshot_element` and `detect_page_features` now use the async
+  `resolveAndGuardUrl` (DNS-resolves the host and rejects internal IPs)
+  instead of the sync `guardUrl` (literal-host only). Closes the bypass
+  where a public hostname resolves to `127.0.0.1` / `169.254.169.254`.
+  `MCP_VIDEO_ALLOW_INTERNAL=1` still bypasses for local dev and is now
+  documented in the README config table.
+
+**Tests:** +41 (104 → 145, all green), tsc clean. New
+`sanitize-tool-paths.test.ts` (attack-blocked + benign-allowed per field
+shape) + `handlers/dispatch.test.ts` (end-to-end choke point) +
+`url-guard-resolve.test.ts` (DNS-rebind, mocked `node:dns/promises`) +
+`runFfprobe` coverage added to `ffmpeg-run.test.ts` (the security-critical
+probe runner was previously untested).
+
 ### Fixed — Cross-platform ffmpeg detection (issue #11, 2026-05-07)
 
 - **Windows startup failure**: `checkDependencies()` previously called
