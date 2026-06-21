@@ -4,7 +4,7 @@
 
 import { jsonResponse, type ToolHandler } from '../lib/types.js';
 import { logger } from '../lib/logger.js';
-import { guardUrl } from '../lib/url-guard.js';
+import { resolveAndGuardUrl } from '../lib/url-guard.js';
 import {
   generateSpeech,
   listElevenLabsVoices,
@@ -67,7 +67,7 @@ export const ttsHandlers: Record<string, ToolHandler> = {
 
   create_narrated_video: async (args) => {
     try {
-      const guard = guardUrl(args.url);
+      const guard = await resolveAndGuardUrl(args.url);
       if (!guard.ok) return jsonResponse({ success: false, error: guard.reason }, true);
 
       const segments: NarrationSegment[] = (args.segments as Array<{

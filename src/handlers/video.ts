@@ -7,7 +7,7 @@ import { logger } from '../lib/logger.js';
 import { recordWebsite } from '../tools/index.js';
 import type { RecordingConfig, Scene, ViewportPreset } from '../tools/index.js';
 import * as path from 'path';
-import { guardUrl } from '../lib/url-guard.js';
+import { resolveAndGuardUrl } from '../lib/url-guard.js';
 
 const OUTPUT_DIR = process.env.VIDEO_OUTPUT_DIR || './output';
 
@@ -17,7 +17,7 @@ export const videoHandlers: Record<string, ToolHandler> = {
    */
   record_website_video: async (args) => {
     try {
-      const guard = guardUrl(args.url);
+      const guard = await resolveAndGuardUrl(args.url);
       if (!guard.ok) return jsonResponse({ success: false, error: guard.reason }, true);
       const config: RecordingConfig = {
         url: guard.url,
@@ -49,7 +49,7 @@ export const videoHandlers: Record<string, ToolHandler> = {
    */
   record_website_scroll: async (args) => {
     try {
-      const guard = guardUrl(args.url);
+      const guard = await resolveAndGuardUrl(args.url);
       if (!guard.ok) return jsonResponse({ success: false, error: guard.reason }, true);
       const duration = args.duration ?? 12;
       const easing = args.easing ?? 'showcase';
@@ -82,7 +82,7 @@ export const videoHandlers: Record<string, ToolHandler> = {
    */
   record_multi_device: async (args) => {
     try {
-      const guard = guardUrl(args.url);
+      const guard = await resolveAndGuardUrl(args.url);
       if (!guard.ok) return jsonResponse({ success: false, error: guard.reason }, true);
       const devices: ViewportPreset[] = args.devices ?? ['desktop', 'tablet', 'mobile'];
       const duration = args.duration ?? 10;
