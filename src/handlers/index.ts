@@ -1,5 +1,6 @@
 import { type ToolHandler, type ToolResponse } from '../lib/types.js';
 import { logger } from '../lib/logger.js';
+import { sanitizeToolPaths } from '../lib/sanitize-tool-paths.js';
 import { videoHandlers } from './video.js';
 import { postProductionHandlers } from './post-production.js';
 import { ttsHandlers } from './tts.js';
@@ -22,6 +23,10 @@ export async function handleToolCall(name: string, args: unknown): Promise<ToolR
     return { content: [{ type: 'text', text: `Unknown tool: ${name}` }], isError: true };
   }
   try {
+    // Choke point: reject flag-injection / NUL-byte path arguments before any
+    // handler can forward them to ffmpeg/ffprobe. No-op for tools that take no
+    // path args. See lib/sanitize-tool-paths.ts for the threat model.
+    sanitizeToolPaths(name, args);
     return await handler(args);
   } catch (error) {
     logger.logError('Tool execution failed', error, { tool: name });
