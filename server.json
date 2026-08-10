@@ -7,12 +7,12 @@
     "url": "https://github.com/studiomeyer-io/mcp-video",
     "source": "github"
   },
-  "version": "1.0.2",
+  "version": "1.0.3",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@studiomeyer/mcp-video",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "transport": {
         "type": "stdio"
       }
