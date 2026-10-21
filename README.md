@@ -8,8 +8,8 @@
 
 
 <!-- badges -->
-[![npm version](https://img.shields.io/npm/v/mcp-video?style=flat-square&color=cb3837&logo=npm&label=npm)](https://www.npmjs.com/package/mcp-video)
-[![npm downloads](https://img.shields.io/npm/dm/mcp-video?style=flat-square&color=cb3837&logo=npm&label=installs%2Fmo)](https://www.npmjs.com/package/mcp-video)
+[![npm version](https://img.shields.io/npm/v/@studiomeyer%2Fmcp-video?style=flat-square&color=cb3837&logo=npm&label=npm)](https://www.npmjs.com/package/@studiomeyer/mcp-video)
+[![npm downloads](https://img.shields.io/npm/dm/@studiomeyer%2Fmcp-video?style=flat-square&color=cb3837&logo=npm&label=installs%2Fmo)](https://www.npmjs.com/package/@studiomeyer/mcp-video)
 ![License](https://img.shields.io/github/license/studiomeyer-io/mcp-video?style=flat-square&color=22c55e&label=license)
 ![Last commit](https://img.shields.io/github/last-commit/studiomeyer-io/mcp-video?style=flat-square&color=88c0d0&label=updated)
 ![GitHub stars](https://img.shields.io/github/stars/studiomeyer-io/mcp-video?style=flat-square&color=ffd700&logo=github&label=stars)
@@ -19,7 +19,7 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
-[![npm version](https://img.shields.io/npm/v/mcp-video?color=blue)](https://www.npmjs.com/package/mcp-video)
+[![npm version](https://img.shields.io/npm/v/@studiomeyer%2Fmcp-video?color=blue)](https://www.npmjs.com/package/@studiomeyer/mcp-video)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org)
 
 8 MCP tools for recording, editing, effects, captions, TTS, and smart screenshots.<br>
@@ -83,7 +83,7 @@ runtime spawn site.
   "mcpServers": {
     "video": {
       "command": "npx",
-      "args": ["-y", "mcp-video"]
+      "args": ["-y", "@studiomeyer/mcp-video"]
     }
   }
 }
@@ -92,7 +92,7 @@ runtime spawn site.
 ### With npx
 
 ```bash
-npx mcp-video
+npx @studiomeyer/mcp-video
 ```
 
 ### From source
@@ -110,10 +110,10 @@ npm start
 
 ```bash
 # Start as HTTP microservice
-npx mcp-video --http --port=9847
+npx @studiomeyer/mcp-video --http --port=9847
 
 # Or via environment variables
-MCP_HTTP=1 MCP_PORT=9847 npx mcp-video
+MCP_HTTP=1 MCP_PORT=9847 npx @studiomeyer/mcp-video
 ```
 
 ## Configuration

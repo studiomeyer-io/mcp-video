@@ -2,7 +2,7 @@
   "name": "@studiomeyer/mcp-video",
   "version": "1.0.3",
   "mcpName": "io.studiomeyer/video",
-  "description": "Cinema-grade video production MCP server — 8 tools for recording, editing, effects, captions, TTS, and smart screenshots. Zero-config, works with any MCP client.",
+  "description": "Cinema-grade video production MCP server \u2014 8 tools for recording, editing, effects, captions, TTS, and smart screenshots. Zero-config, works with any MCP client.",
   "type": "module",
   "main": "dist/server.js",
   "bin": {
@@ -44,7 +44,7 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@modelcontextprotocol/sdk": "^1.32.1",
     "playwright": "^1.59.1",
     "zod": "^3.22.0"
   },
