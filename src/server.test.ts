@@ -1,4 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import { readFileSync } from 'node:fs';
 
 vi.mock('./lib/logger.js', () => ({
   logger: { info: vi.fn(), logError: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
@@ -24,6 +27,34 @@ describe('createMcpServer', () => {
     const { createMcpServer } = await import('./server.js');
     const server = createMcpServer();
     expect(server).toBeDefined();
+  });
+});
+
+describe('delivered tool schemas', () => {
+  it('keeps the SDK tool schema fields, enums and passthrough input behavior', async () => {
+    const { createMcpServer } = await import('./server.js');
+    const server = createMcpServer();
+    const client = new Client({ name: 'video-schema-regression', version: '1.0.0' });
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    try {
+      await server.connect(serverTransport);
+      await client.connect(clientTransport);
+      const packageMetadata = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as { version: string };
+      expect(client.getServerVersion()?.version).toBe(packageMetadata.version);
+      const { tools } = await client.listTools();
+      expect(tools).toHaveLength(8);
+      const record = tools.find((tool) => tool.name === 'video_record')!.inputSchema;
+      expect(record.properties).toMatchObject({
+        type: { type: 'string', enum: ['cinema', 'scroll', 'multi-device'] },
+        url: { type: 'string', minLength: 1 },
+      });
+      expect(record.additionalProperties).not.toBe(false);
+      const invalid = await client.callTool({ name: 'video_record', arguments: { type: 'cinema', url: '' } });
+      expect(invalid.isError).toBe(true);
+    } finally {
+      await client.close();
+      await server.close();
+    }
   });
 });
 
