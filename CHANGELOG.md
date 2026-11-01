@@ -5,12 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [1.0.4] - 2026-11-01
 
 
 ### Dependency maintenance
 
-- Prepare patch release 1.0.4. MCP initialization now reads its version from the packaged manifest, covered by the actual SDK handshake.
+- MCP initialization now reads version 1.0.4 from the packaged manifest, covered by the actual SDK handshake.
 - Update direct Zod to ^4.6.7 and refresh patched transitive dependencies. Add an actual SDK transport regression for URL/type schemas, enum validation, passthrough and invalid-input rejection.
 - The checked build/typecheck and 146 tests pass; stdio lists eight populated schemas. All-dependency and production audits report zero findings.
 
