@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+
+### Dependency maintenance
+
+- Prepare patch release 1.0.4. MCP initialization now reads its version from the packaged manifest, covered by the actual SDK handshake.
+- Update direct Zod to ^4.6.7 and refresh patched transitive dependencies. Add an actual SDK transport regression for URL/type schemas, enum validation, passthrough and invalid-input rejection.
+- The checked build/typecheck and 146 tests pass; stdio lists eight populated schemas. All-dependency and production audits report zero findings.
+
 ### Security — wire path/SSRF guards into the tool boundary (2026-06-21)
 
 The prior sweeps *built* `validateFfmpegPath` and `resolveAndGuardUrl` but

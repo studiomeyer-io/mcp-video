@@ -9,6 +9,7 @@
  */
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
+import { readFileSync } from 'node:fs';
 import { logger } from './lib/logger.js';
 import { startDualTransport } from './lib/dual-transport.js';
 import { videoHandlers } from './handlers/video.js';
@@ -19,7 +20,14 @@ import { ttsHandlers } from './handlers/tts.js';
 import { smartScreenshotHandlers } from './handlers/smart-screenshot.js';
 
 const SERVER_NAME = 'mcp-video';
-const SERVER_VERSION = '1.0.0';
+function readPackageVersion(): string {
+  const metadata: unknown = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+  if (!metadata || typeof metadata !== 'object' || !('version' in metadata) || typeof metadata.version !== 'string') {
+    throw new Error('Package version is missing');
+  }
+  return metadata.version;
+}
+const SERVER_VERSION = readPackageVersion();
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const ALL_HANDLERS: Record<string, (a: any) => any> = {
